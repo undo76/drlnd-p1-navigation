@@ -1,0 +1,26 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+tensorflow = "==1.7.1"
+matplotlib = "*"
+numpy = ">=1.11.0"
+jupyter = "*"
+pytest = ">=3.2.2"
+docopt = "*"
+protobuf = "==3.5.2"
+grpcio = "==1.11.0"
+torch = "==0.4.0"
+pandas = "*"
+scipy = "*"
+ipykernel = "*"
+Pillow = ">=4.2.1"
+PyYAML = "*"
+unityagents = {path = "./python"}
+
+[dev-packages]
+
+[requires]
+python_version = "3.6"
