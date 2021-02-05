@@ -15,7 +15,7 @@ LR = 1e-4  # learning rate
 UPDATE_EVERY = 4  # how often to update the network
 DEFAULT_PRIORITY = 10.0  # priority for new experiences
 PRIORITY_EPS = 0.0001  # Epsilon to add to priorities
-PRIORITY_NU = 0.5  # Exponent for priority
+PRIORITY_ETA = 0.5  # Exponent for priority
 PRIORITY_WEIGHT_BETA = 1.0  # Exponent for the priority importance loss scaling
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -27,7 +27,7 @@ class Agent:
     def __init__(self, state_size, action_size, seed, batch_size=BATCH_SIZE, buffer_size=BUFFER_SIZE, gamma=GAMMA,
                  tau=TAU, lr=LR,
                  update_every=UPDATE_EVERY, default_priority=DEFAULT_PRIORITY, priority_eps=PRIORITY_EPS,
-                 priority_nu=PRIORITY_NU, priority_weight_beta=PRIORITY_WEIGHT_BETA):
+                 priority_eta=PRIORITY_ETA, priority_weight_beta=PRIORITY_WEIGHT_BETA):
         """Initialize an Agent object.
         
         Params
@@ -43,7 +43,7 @@ class Agent:
             update_every (int): how often to update the network
             default_priority (float): priority for new experiences
             priority_eps (float): Epsilon to add to priorities
-            priority_nu (float): Exponent for priority
+            priority_eta (float): Exponent for priority
             priority_wight_beta (float): Exponent for the priority importance loss scaling
         """
         self.state_size = state_size
@@ -55,7 +55,7 @@ class Agent:
         self.update_every = update_every
         self.default_priority = default_priority
         self.priority_eps = priority_eps
-        self.priority_nu = priority_nu
+        self.priority_eta = priority_eta
         self.priority_weight_beta = priority_weight_beta
         random.seed(seed)
 
@@ -66,7 +66,7 @@ class Agent:
 
         # Replay memory
         self.memory = ReplayBuffer(action_size, buffer_size, batch_size, seed, default_priority, priority_eps,
-                                   priority_nu)
+                                   priority_eta)
         # Initialize time step (for updating every UPDATE_EVERY steps)
         self.t_step = 0
 
@@ -157,7 +157,7 @@ class ReplayBuffer:
     """Fixed-size buffer to store experience tuples."""
 
     def __init__(self, action_size, buffer_size, batch_size, seed,
-                 default_priority, priority_eps, priority_nu):
+                 default_priority, priority_eps, priority_eta):
         """Initialize a ReplayBuffer object.
 
         Params
@@ -168,7 +168,7 @@ class ReplayBuffer:
             seed (int): random seed
             default_priority (float): initial priority for experiences
             priority_eps (float): Priority epsilon
-            priority_nu (float): Priority exponent
+            priority_eta (float): Priority exponent
         """
         self.action_size = action_size
         self.buffer_size = buffer_size
@@ -180,7 +180,7 @@ class ReplayBuffer:
         self.rng = np.random.default_rng(seed=seed)
         self.default_priority = default_priority
         self.priority_eps = priority_eps
-        self.priority_nu = priority_nu
+        self.priority_eta = priority_eta
 
     def add(self, state, action, reward, next_state, done):
         """Add a new experience to memory."""
@@ -190,7 +190,7 @@ class ReplayBuffer:
 
     def update_priorities(self, priorities, indices):
         """Update the priorities of the samples"""
-        self.priorities[indices] = (priorities + self.priority_eps) ** self.priority_nu
+        self.priorities[indices] = (priorities + self.priority_eps) ** self.priority_eta
 
     def sample(self):
         """Randomly sample a batch of experiences from memory."""
